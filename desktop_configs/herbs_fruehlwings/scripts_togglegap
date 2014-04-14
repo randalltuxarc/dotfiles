@@ -1,0 +1,14 @@
+#!/bin/bash
+
+function hc() {
+    herbstclient "$@"
+}
+
+gapfile=${XDG_DATA_HOME}/herbstluftwm/gap
+if [ $(cat ${gapfile}) = 0 ]; then
+	hc set window_gap 4
+	echo 1 > ${gapfile}
+else
+	hc set window_gap 0
+	echo 0 > ${gapfile}
+fi

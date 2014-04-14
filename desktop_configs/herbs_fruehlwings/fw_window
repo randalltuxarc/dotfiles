@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# i be focus!
+win=$(xdotool search --classname fruehlingswind)
+xdotool windowfocus ${win}
+
+echo -n "${1}:"
+read -n 1 -t 5 key
+
+(nohup ${XDG_CONFIG_HOME}/herbstluftwm/fruehlingswind/${1} ${key} &)
+
+sleep 0.5

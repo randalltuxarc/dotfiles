@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# this is a simple config for herbstluftwm
+
+# don't feel like typing "herbstclient" everytime
+function hc() {
+	herbstclient "$@"
+}
+
+# scripts
+script=/etc/xdg/herbstluftwm/scripts
+
+# frühlingswind
+# fruehlingswind="urxvt -geometry 40x1+125+0 -name fruehlingswind -e ${XDG_CONFIG_HOME}/herbstluftwm/fruehlingswind/window"
+
+hc emit_hook reload
+
+# Autostart
+( ${XDG_CONFIG_HOME}/herbstluftwm/panel.sh &)
+# ( feh --bg-fill /mnt/daten/Bilder/Wallpapers/crystalcave.png &)
+( nitrogen --restore &)
+
+hc set default_frame_layout 2
+
+# keybindings
+Mod=Mod4
+hc keybind $Mod-Shift-q quit
+hc keybind $Mod-Shift-r reload
+hc keybind $Mod-Shift-c close
+
+# applications
+hc keybind $Mod-Return spawn urxvt
+hc keybind $Mod-p spawn gmrun
+hc keybind $Mod-space spawn /etc/xdg/herbstluftwm/applications
+
+# media keys
+hc keybind XF86AudioNext spawn mpc next
+hc keybind XF86AudioPrev spawn mpc prev
+hc keybind XF86AudioPlay spawn mpc toggle
+hc keybind XF86AudioStop spawn mpc stop
+
+hc keybind XF86AudioRaiseVolume spawn /home/crshd/bin/dvol -i 5
+hc keybind XF86AudioLowerVolume spawn /home/crshd/bin/dvol -d 5
+hc keybind XF86AudioMute spawn /home/crshd/bin/dvol -t
+
+hc keybind XF86AudioMedia spawn urxvt -e ncmpcpp
+
+# tags
+# TAG_NAMES=( {1..9} )
+TAG_NAMES=( h e r b s t )
+TAG_KEYS=( {1..9} 0 )
+
+hc rename default "${TAG_NAMES[0]}" || true
+for i in ${!TAG_NAMES[@]} ; do
+    hc add "${TAG_NAMES[$i]}"
+    key="${TAG_KEYS[$i]}"
+    if ! [ -z "$key" ] ; then
+        hc keybind "$Mod-$key" use "${TAG_NAMES[$i]}"
+        hc keybind "$Mod-Shift-$key" move "${TAG_NAMES[$i]}"
+    fi
+done
+
+# layouting
+hc keybind $Mod-r remove
+hc keybind $Mod-c cycle_layout 1
+hc keybind $Mod-s split vertical 0.5
+hc keybind $Mod-Shift-s split horizontal 0.5
+hc keybind $Mod-Shift-f floating toggle
+hc keybind $Mod-f fullscreen toggle
+hc keybind $Mod-p pseudotile toggle
+hc keybind $Mod-t spawn ${script}/togglegap
+
+# resizing
+RESIZESTEP=0.05
+hc keybind $Mod-Control-h resize left +$RESIZESTEP
+hc keybind $Mod-Control-j resize down +$RESIZESTEP
+hc keybind $Mod-Control-k resize up +$RESIZESTEP
+hc keybind $Mod-Control-l resize right +$RESIZESTEP
+
+# mouse
+hc mousebind $Mod-Button1 move
+hc mousebind $Mod-Button2 resize
+hc mousebind $Mod-Button3 zoom
+
+# focus
+hc keybind $Mod-BackSpace   cycle_monitor
+hc keybind $Mod-Tab         cycle_all +1
+hc keybind $Mod-Shift-Tab   cycle_all -1
+hc keybind $Mod-h focus left
+hc keybind $Mod-j focus down
+hc keybind $Mod-k focus up
+hc keybind $Mod-l focus right
+hc keybind $Mod-Shift-h shift left
+hc keybind $Mod-Shift-j shift down
+hc keybind $Mod-Shift-k shift up
+hc keybind $Mod-Shift-l shift right
+
+# colors
+hc set frame_border_active_color '#000000'
+hc set frame_border_normal_color '#000000'
+hc set frame_bg_normal_color '#151515'
+hc set frame_bg_active_color '#151515'
+hc set frame_border_width 1
+hc set window_border_width 2
+hc set window_border_normal_color '#202020'
+hc set window_border_active_color '#ffaf5f'
+
+# layout
+if [ $(cat ${XDG_DATA_HOME}/herbstluftwm/gap) = 0 ]; then
+	hc set window_gap 0
+else
+	hc set window_gap 4
+fi
+
+for tag in ${TAG_NAMES}; do
+	layoutfile=${XDG_DATA_HOME}/herbstluftwm/layout/${tag}
+	if [ -f ${layoutfile} ]; then
+		hc load ${tag} $(cat ${layoutfile})
+	fi
+done
+
+# rules
+hc unrule -F
+#hc rule class=XTerm tag=3 # move all xterms to tag 3
+hc rule focus=off # normally do not focus new clients
+hc rule instance~'(bashrun.*|fruehlingswind)' manage=off focus=on
+# give focus to most common terminals
+hc rule class~'(.*[Rr]xvt.*|.*[Tt]erm|Konsole)' focus=on
+hc rule windowtype~'_NET_WM_WINDOW_TYPE_(DIALOG|UTILITY|SPLASH)' pseudotile=on
+hc rule windowtype='_NET_WM_WINDOW_TYPE_DIALOG' focus=on
+hc rule windowtype~'_NET_WM_WINDOW_TYPE_(NOTIFICATION|DOCK)' manage=off
+
+hc set tree_style "╾│ ├└╼─┐"

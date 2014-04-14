@@ -1,0 +1,17 @@
+#!/bin/bash
+function spawn() {
+	( ${@} &)
+}
+
+case ${1} in
+	# b ) spawn luakit ;;
+	b ) spawn firefox ;;
+#	v ) spawn emacs -l ${XDG_CONFIG_HOME}/emacs/init.el ;;
+	v ) spawn gvim ;;
+	n ) spawn urxvt -e ncmpcpp ;;
+	m ) spawn urxvt -e mutt -F ${XDG_CONFIG_HOME}/mutt/muttrc ;;
+	g ) spawn gimp-2.7 ;;
+	f ) spawn firefox ;;
+esac
+
+sleep 5
